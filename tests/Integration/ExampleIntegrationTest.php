@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Plugin_Name\Tests\Integration;
+namespace Apermo\ClassicToGutenbergAddons\Tests\Integration;
 
-use Plugin_Name\Plugin;
+use Apermo\ClassicToGutenbergAddons\Plugin;
 use WP_UnitTestCase;
 
 /**
@@ -22,23 +22,14 @@ class ExampleIntegrationTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The plugin or theme is active.
+	 * The plugin is active.
 	 *
 	 * @return void
 	 */
 	public function test_project_is_active(): void {
-		$plugin_file = \dirname( __DIR__, 2 ) . '/plugin.php';
-
-		if ( \file_exists( $plugin_file ) ) {
-			$this->assertNotEmpty(
-				Plugin::VERSION,
-				'Plugin version should be set.',
-			);
-		} else {
-			$this->assertNotFalse(
-				wp_get_theme()->get( 'Name' ),
-				'Active theme should have a name.',
-			);
-		}
+		$this->assertNotEmpty(
+			Plugin::VERSION,
+			'Plugin version should be set.',
+		);
 	}
 }

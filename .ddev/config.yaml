@@ -1,4 +1,4 @@
-name: plugin-name
+name: classic-to-gutenberg-addons
 type: php
 docroot: ""
 php_version: "8.4"

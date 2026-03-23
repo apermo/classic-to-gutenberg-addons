@@ -1,33 +1,22 @@
-# template-wordpress
+# Classic to Gutenberg Addons
 
-[![PHP CI](https://github.com/apermo/template-wordpress/actions/workflows/ci.yml/badge.svg)](https://github.com/apermo/template-wordpress/actions/workflows/ci.yml)
+[![PHP CI](https://github.com/apermo/classic-to-gutenberg-addons/actions/workflows/ci.yml/badge.svg)](https://github.com/apermo/classic-to-gutenberg-addons/actions/workflows/ci.yml)
 [![License: GPL v2+](https://img.shields.io/badge/License-GPLv2+-blue.svg)](LICENSE)
 
-GitHub template repository for bootstrapping WordPress plugins and themes. Ships both plugin and theme scaffolding; a `setup.sh` script lets developers choose their mode and configures the project accordingly.
+Niche converters for [Classic to Gutenberg](https://github.com/apermo/classic-to-gutenberg): page builders, third-party
+plugins, and other specialized HTML patterns that don't belong in the core plugin.
 
 ## Requirements
 
-- PHP 8.1+
-- Composer
-- [DDEV](https://ddev.readthedocs.io/) (for local development)
+- PHP 8.2+
+- WordPress 6.2+
+- [apermo/classic-to-gutenberg](https://github.com/apermo/classic-to-gutenberg) ^0.4
 
 ## Installation
 
-1. [Create a new repository from this template](https://github.com/apermo/template-wordpress/generate)
-2. Clone your new repository
-3. Run the setup script:
-
 ```bash
-bash setup.sh
+composer require apermo/classic-to-gutenberg-addons
 ```
-
-The script prompts for:
-- **Slug** (kebab-case, e.g. `my-plugin`)
-- **Namespace** (e.g. `Apermo\MyPlugin`)
-- **Composer package name**
-- **Mode** (`plugin` or `theme`)
-
-It replaces all placeholders, removes irrelevant mode files, configures DDEV, and optionally sets up GitHub labels and branch protection.
 
 ## Development
 
@@ -47,25 +36,12 @@ composer test:integration # Run integration tests only
 ddev start && ddev orchestrate
 ```
 
-Uses [ddev-orchestrate](https://github.com/apermo/ddev-orchestrate) to download WordPress, create `wp-config.php`, install, and activate the plugin/theme.
-
 ### Git Hooks
 
 Enable the pre-commit hook (PHPCS + PHPStan on staged files):
 
 ```bash
 git config core.hooksPath .githooks
-```
-
-## Template Sync
-
-To pull upstream template changes into a derived project:
-
-```bash
-git remote add template https://github.com/apermo/template-wordpress.git
-git fetch template
-git checkout -b chore/sync-template
-git merge template/main --allow-unrelated-histories
 ```
 
 ## License

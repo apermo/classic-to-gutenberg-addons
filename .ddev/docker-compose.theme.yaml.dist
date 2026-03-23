@@ -1,4 +1,0 @@
-services:
-    web:
-        volumes:
-            - ../:/var/www/html/wp-content/themes/plugin-name
