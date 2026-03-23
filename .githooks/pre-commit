@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+STAGED_PHP_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.php$' || true)
+
+if [ -z "$STAGED_PHP_FILES" ]; then
+    exit 0
+fi
+
+echo "Running PHPCS on staged files..."
+if ! echo "$STAGED_PHP_FILES" | xargs vendor/bin/phpcs --standard=phpcs.xml.dist; then
+    echo "PHPCS failed. Fix violations before committing."
+    exit 1
+fi
+
+echo "Running PHPStan on staged files..."
+if ! echo "$STAGED_PHP_FILES" | xargs vendor/bin/phpstan analyse --no-progress; then
+    echo "PHPStan failed. Fix issues before committing."
+    exit 1
+fi
+
+echo "All checks passed."

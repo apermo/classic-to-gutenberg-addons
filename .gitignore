@@ -1,0 +1,21 @@
+vendor/
+composer.lock
+.phpunit.cache/
+wp-tests-config.php
+.idea/
+node_modules/
+package-lock.json
+.DS_Store
+.auth/
+playwright-report/
+test-results/
+
+# WordPress core (downloaded by DDEV orchestrate)
+/wp-admin/
+/wp-includes/
+/wp-content/
+/wp-*.php
+/xmlrpc.php
+/license.txt
+/readme.html
+/index.php
