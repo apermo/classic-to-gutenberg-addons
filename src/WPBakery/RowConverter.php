@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Apermo\WPBakeryToGutenberg\WPBakery;
 
+use Apermo\ClassicToGutenberg\Converter\BlockMarkup;
 use Apermo\WPBakeryToGutenberg\WPBakery\ElementHandler\VcElementHandlerInterface;
 use Closure;
 
@@ -160,7 +161,7 @@ class RowConverter {
 
 		$inner = \implode( "\n\n", $column_blocks );
 
-		return "<!-- wp:columns -->\n<div class=\"wp-block-columns\">{$inner}</div>\n<!-- /wp:columns -->";
+		return BlockMarkup::wrap( 'columns', "<div class=\"wp-block-columns\">{$inner}</div>" );
 	}
 
 	/**
@@ -174,18 +175,15 @@ class RowConverter {
 	private function build_column_block( string $width, string $content ): string {
 		$inner_blocks = $this->convert_inner_content( $content );
 		$percent      = $width !== '' ? ShortcodeParser::fraction_to_percent( $width ) : '';
-		$attrs_json   = '';
+		$attrs        = [];
 		$style_attr   = '';
 
 		if ( $percent !== '' && $percent !== '100%' ) {
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode -- unit-testable without WP.
-			$attrs_json = ' ' . (string) \json_encode( [ 'width' => $percent ], \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE );
+			$attrs      = [ 'width' => $percent ];
 			$style_attr = " style=\"flex-basis:{$percent}\"";
 		}
 
-		return "<!-- wp:column{$attrs_json} -->\n"
-			. "<div class=\"wp-block-column\"{$style_attr}>{$inner_blocks}</div>\n"
-			. '<!-- /wp:column -->';
+		return BlockMarkup::wrap( 'column', "<div class=\"wp-block-column\"{$style_attr}>{$inner_blocks}</div>", $attrs );
 	}
 
 	/**
@@ -262,7 +260,7 @@ class RowConverter {
 	 */
 	private function try_match_unknown_shortcode( string $remaining ): ?array {
 		if ( \preg_match( '/^\[(\w[\w-]*)(?:\s[^\]]*)?](?:.*?\[\/\1])?/s', $remaining, $match ) ) {
-			$block = "<!-- wp:shortcode -->\n{$match[0]}\n<!-- /wp:shortcode -->";
+			$block = BlockMarkup::wrap( 'shortcode', $match[0] );
 			return [ \substr( $remaining, \strlen( $match[0] ) ), $block ];
 		}
 

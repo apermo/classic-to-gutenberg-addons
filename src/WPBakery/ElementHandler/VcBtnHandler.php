@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Apermo\WPBakeryToGutenberg\WPBakery\ElementHandler;
 
+use Apermo\ClassicToGutenberg\Converter\BlockMarkup;
 use Apermo\WPBakeryToGutenberg\WPBakery\ShortcodeParser;
 use Closure;
 
@@ -69,12 +70,11 @@ class VcBtnHandler implements VcElementHandlerInterface {
 		$safe_href  = $href !== '' ? \htmlspecialchars( $href, \ENT_QUOTES | \ENT_HTML5, 'UTF-8' ) : '';
 		$href_attr  = $safe_href !== '' ? " href=\"{$safe_href}\"" : '';
 
-		$button = "<!-- wp:button -->\n"
-			. "<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\"{$href_attr}>{$safe_title}</a></div>\n"
-			. '<!-- /wp:button -->';
+		$button = BlockMarkup::wrap(
+			'button',
+			"<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\"{$href_attr}>{$safe_title}</a></div>",
+		);
 
-		return "<!-- wp:buttons -->\n"
-			. "<div class=\"wp-block-buttons\">{$button}</div>\n"
-			. '<!-- /wp:buttons -->';
+		return BlockMarkup::wrap( 'buttons', "<div class=\"wp-block-buttons\">{$button}</div>" );
 	}
 }

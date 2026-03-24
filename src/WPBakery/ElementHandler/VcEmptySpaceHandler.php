@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Apermo\WPBakeryToGutenberg\WPBakery\ElementHandler;
 
+use Apermo\ClassicToGutenberg\Converter\BlockMarkup;
 use Apermo\WPBakeryToGutenberg\WPBakery\ShortcodeParser;
 use Closure;
 
@@ -33,7 +34,6 @@ class VcEmptySpaceHandler implements VcElementHandlerInterface {
 		$attrs  = ShortcodeParser::parse_attrs( $shortcode );
 		$height = $attrs['height'] ?? '32px';
 
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode -- unit-testable without WP.
-		return '<!-- wp:spacer ' . (string) \json_encode( [ 'height' => $height ], \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE ) . ' /-->';
+		return BlockMarkup::self_closing( 'spacer', [ 'height' => $height ] );
 	}
 }

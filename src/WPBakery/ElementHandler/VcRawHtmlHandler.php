@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Apermo\WPBakeryToGutenberg\WPBakery\ElementHandler;
 
+use Apermo\ClassicToGutenberg\Converter\BlockMarkup;
 use Apermo\WPBakeryToGutenberg\WPBakery\ShortcodeParser;
 use Closure;
 
@@ -45,6 +46,6 @@ class VcRawHtmlHandler implements VcElementHandlerInterface {
 			$content = $decoded;
 		}
 
-		return "<!-- wp:html -->\n{$content}\n<!-- /wp:html -->";
+		return BlockMarkup::wrap( 'html', $content );
 	}
 }

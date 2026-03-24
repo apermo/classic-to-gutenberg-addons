@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Apermo\WPBakeryToGutenberg\WPBakery\ElementHandler;
 
+use Apermo\ClassicToGutenberg\Converter\BlockMarkup;
 use Apermo\WPBakeryToGutenberg\WPBakery\ShortcodeParser;
 use Closure;
 
@@ -44,14 +45,9 @@ class VcSingleImageHandler implements VcElementHandlerInterface {
 		$attachment_id = (int) $image;
 		$block_attrs   = [ 'id' => $attachment_id ];
 
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode -- unit-testable without WP.
-		$attrs_json = (string) \json_encode( $block_attrs, \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE );
-
 		$img_html = $this->resolve_image( $attachment_id );
 
-		return "<!-- wp:image {$attrs_json} -->\n"
-			. "<figure class=\"wp-block-image\">{$img_html}</figure>\n"
-			. '<!-- /wp:image -->';
+		return BlockMarkup::wrap( 'image', "<figure class=\"wp-block-image\">{$img_html}</figure>", $block_attrs );
 	}
 
 	/**

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Apermo\WPBakeryToGutenberg\WPBakery\ElementHandler;
 
+use Apermo\ClassicToGutenberg\Converter\BlockMarkup;
 use Closure;
 
 /**
@@ -29,8 +30,6 @@ class VcSeparatorHandler implements VcElementHandlerInterface {
 	 * @return string Gutenberg block markup.
 	 */
 	public function convert( string $shortcode, Closure $inner_converter ): string {
-		return "<!-- wp:separator -->\n"
-			. "<hr class=\"wp-block-separator has-alpha-channel-opacity\"/>\n"
-			. '<!-- /wp:separator -->';
+		return BlockMarkup::wrap( 'separator', '<hr class="wp-block-separator has-alpha-channel-opacity"/>' );
 	}
 }

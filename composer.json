@@ -23,7 +23,7 @@
     },
     "require": {
         "php": ">=8.2",
-        "apermo/classic-to-gutenberg": "^0.4"
+        "apermo/classic-to-gutenberg": "^0.5"
     },
     "require-dev": {
         "apermo/apermo-coding-standards": "^2.0",
