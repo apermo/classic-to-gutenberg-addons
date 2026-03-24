@@ -230,4 +230,51 @@ class VcElementHandlerTest extends TestCase {
 		$this->assertStringContainsString( 'https://example.com', $result );
 		$this->assertStringContainsString( 'Go', $result );
 	}
+
+	/**
+	 * VcBtnHandler escapes HTML in title and href.
+	 *
+	 * @return void
+	 */
+	public function test_btn_escapes_html(): void {
+		$handler = new VcBtnHandler();
+		$result  = $handler->convert(
+			'[vc_btn title="<script>alert(1)</script>" link="url:javascript%3Aalert(1)"]',
+			$this->inner_converter,
+		);
+
+		$this->assertStringNotContainsString( '<script>', $result );
+		$this->assertStringContainsString( '&lt;script&gt;', $result );
+	}
+
+	/**
+	 * VcBtnHandler with empty link but valid title.
+	 *
+	 * @return void
+	 */
+	public function test_btn_no_link(): void {
+		$handler = new VcBtnHandler();
+		$result  = $handler->convert(
+			'[vc_btn title="Click me"]',
+			$this->inner_converter,
+		);
+
+		$this->assertStringContainsString( 'Click me', $result );
+		$this->assertStringNotContainsString( 'href', $result );
+	}
+
+	/**
+	 * VcSingleImageHandler validates image ID is numeric.
+	 *
+	 * @return void
+	 */
+	public function test_single_image_non_numeric_id(): void {
+		$handler = new VcSingleImageHandler();
+		$result  = $handler->convert(
+			'[vc_single_image image="not-a-number"]',
+			$this->inner_converter,
+		);
+
+		$this->assertSame( '', $result );
+	}
 }

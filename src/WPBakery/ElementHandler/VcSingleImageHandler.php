@@ -10,8 +10,9 @@ use Closure;
 /**
  * Converts [vc_single_image] to a core/image block.
  *
- * Produces a placeholder image block with the attachment ID.
- * The actual image URL is resolved at render time by WordPress.
+ * When wp_get_attachment_image() is available (WordPress loaded), the image
+ * block includes a resolved src and alt. Otherwise produces a placeholder
+ * with just the attachment ID.
  */
 class VcSingleImageHandler implements VcElementHandlerInterface {
 
@@ -36,17 +37,41 @@ class VcSingleImageHandler implements VcElementHandlerInterface {
 		$attrs = ShortcodeParser::parse_attrs( $shortcode );
 		$image = $attrs['image'] ?? '';
 
-		if ( $image === '' ) {
+		if ( $image === '' || ! \ctype_digit( $image ) ) {
 			return '';
 		}
 
-		$block_attrs = [ 'id' => (int) $image ];
+		$attachment_id = (int) $image;
+		$block_attrs   = [ 'id' => $attachment_id ];
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode -- unit-testable without WP.
 		$attrs_json = (string) \json_encode( $block_attrs, \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE );
 
+		$img_html = $this->resolve_image( $attachment_id );
+
 		return "<!-- wp:image {$attrs_json} -->\n"
-			. "<figure class=\"wp-block-image\"><img class=\"wp-image-{$image}\"/></figure>\n"
+			. "<figure class=\"wp-block-image\">{$img_html}</figure>\n"
 			. '<!-- /wp:image -->';
+	}
+
+	/**
+	 * Resolve image HTML from an attachment ID.
+	 *
+	 * @param int $attachment_id The WordPress attachment ID.
+	 *
+	 * @return string The <img> tag with src/alt, or a placeholder.
+	 */
+	private function resolve_image( int $attachment_id ): string {
+		$img_class = "wp-image-{$attachment_id}";
+
+		if ( \function_exists( 'wp_get_attachment_image' ) ) {
+			$img = wp_get_attachment_image( $attachment_id, 'full', false, [ 'class' => $img_class ] );
+
+			if ( \is_string( $img ) && $img !== '' ) {
+				return $img;
+			}
+		}
+
+		return "<img class=\"{$img_class}\"/>";
 	}
 }

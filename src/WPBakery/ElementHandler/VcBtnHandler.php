@@ -65,10 +65,12 @@ class VcBtnHandler implements VcElementHandlerInterface {
 
 		$href = self::parse_vc_link( $link );
 
-		$href_attr = $href !== '' ? " href=\"{$href}\"" : '';
+		$safe_title = \htmlspecialchars( $title, \ENT_QUOTES | \ENT_HTML5, 'UTF-8' );
+		$safe_href  = $href !== '' ? \htmlspecialchars( $href, \ENT_QUOTES | \ENT_HTML5, 'UTF-8' ) : '';
+		$href_attr  = $safe_href !== '' ? " href=\"{$safe_href}\"" : '';
 
 		$button = "<!-- wp:button -->\n"
-			. "<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\"{$href_attr}>{$title}</a></div>\n"
+			. "<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\"{$href_attr}>{$safe_title}</a></div>\n"
 			. '<!-- /wp:button -->';
 
 		return "<!-- wp:buttons -->\n"
