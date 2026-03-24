@@ -37,6 +37,16 @@ class Converter {
 	private int $counter = 0;
 
 	/**
+	 * Nesting depth to guard against re-entrant calls.
+	 *
+	 * The inner ContentConverter also fires pre/post_convert filters.
+	 * This counter prevents the nested call from resetting state.
+	 *
+	 * @var int
+	 */
+	private int $depth = 0;
+
+	/**
 	 * Create a new converter.
 	 *
 	 * @param RowConverter $row_converter The row converter instance.
@@ -56,6 +66,12 @@ class Converter {
 	 * @return string Content with WPBakery rows replaced by placeholders.
 	 */
 	public function pre_convert( string $content ): string {
+		$this->depth++;
+
+		if ( $this->depth > 1 ) {
+			return $content;
+		}
+
 		$this->blocks  = [];
 		$this->counter = 0;
 
@@ -85,6 +101,12 @@ class Converter {
 	 * @return string Content with placeholders replaced by block markup.
 	 */
 	public function post_convert( string $content ): string {
+		$this->depth--;
+
+		if ( $this->depth > 0 ) {
+			return $content;
+		}
+
 		// Replace placeholders wrapped in html blocks by the pipeline.
 		$content = (string) \preg_replace_callback(
 			'/<!-- wp:html -->\s*<!-- vc:placeholder:(\d+) -->\s*<!-- \/wp:html -->/',

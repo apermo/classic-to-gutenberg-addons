@@ -153,4 +153,36 @@ class ConverterTest extends TestCase {
 
 		$this->assertStringContainsString( '<!-- vc:placeholder:0 -->', $result );
 	}
+
+	/**
+	 * Nested pre_convert calls (from inner ContentConverter) are skipped.
+	 *
+	 * @return void
+	 */
+	public function test_nested_pre_convert_is_noop(): void {
+		$converter = new Converter( $this->row_converter );
+
+		// Simulate outer pre_convert.
+		$converter->pre_convert(
+			'[vc_row][vc_column][vc_column_text]Outer[/vc_column_text][/vc_column][/vc_row]',
+		);
+
+		// Simulate nested pre_convert (from inner converter firing the filter).
+		$nested_result = $converter->pre_convert( 'Inner content without rows' );
+
+		// Nested call should pass through unchanged.
+		$this->assertSame( 'Inner content without rows', $nested_result );
+
+		// Simulate nested post_convert.
+		$nested_post = $converter->post_convert( 'inner result' );
+		$this->assertSame( 'inner result', $nested_post );
+
+		// Outer post_convert should still work.
+		$result = $converter->post_convert(
+			"<!-- wp:html -->\n<!-- vc:placeholder:0 -->\n<!-- /wp:html -->",
+		);
+
+		$this->assertStringContainsString( 'Outer', $result );
+		$this->assertStringNotContainsString( 'vc:placeholder', $result );
+	}
 }
