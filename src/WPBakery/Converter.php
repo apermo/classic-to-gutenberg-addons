@@ -107,17 +107,26 @@ class Converter {
 			return $content;
 		}
 
+		$replacer = fn( array $matches ): string => $this->blocks[ (int) $matches[1] ] ?? '';
+
 		// Replace placeholders wrapped in html blocks by the pipeline.
 		$content = (string) \preg_replace_callback(
 			'/<!-- wp:html -->\s*<!-- vc:placeholder:(\d+) -->\s*<!-- \/wp:html -->/',
-			fn( array $matches ): string => $this->blocks[ (int) $matches[1] ] ?? '',
+			$replacer,
+			$content,
+		);
+
+		// Replace placeholders wrapped in paragraph blocks (wpautop wraps comments in <p>).
+		$content = (string) \preg_replace_callback(
+			'/<!-- wp:paragraph -->\s*<p>\s*<!-- vc:placeholder:(\d+) -->\s*<\/p>\s*<!-- \/wp:paragraph -->/',
+			$replacer,
 			$content,
 		);
 
 		// Replace any remaining bare placeholders (edge case).
 		$content = (string) \preg_replace_callback(
 			'/<!-- vc:placeholder:(\d+) -->/',
-			fn( array $matches ): string => $this->blocks[ (int) $matches[1] ] ?? '',
+			$replacer,
 			$content,
 		);
 

@@ -87,6 +87,29 @@ class ConverterTest extends TestCase {
 	}
 
 	/**
+	 * Post-convert swaps placeholders wrapped in paragraph blocks (wpautop behavior).
+	 *
+	 * @return void
+	 */
+	public function test_post_convert_swaps_paragraph_wrapped_placeholders(): void {
+		$converter = new Converter( $this->row_converter );
+
+		$converter->pre_convert(
+			'[vc_row][vc_column][vc_column_text]Hello[/vc_column_text][/vc_column][/vc_row]',
+		);
+
+		// Simulate wpautop wrapping the comment in <p>, then ParagraphConverter wrapping in block.
+		$pipeline_output = "<!-- wp:paragraph -->\n<p><!-- vc:placeholder:0 --></p>\n<!-- /wp:paragraph -->";
+
+		$result = $converter->post_convert( $pipeline_output );
+
+		$this->assertStringNotContainsString( 'vc:placeholder', $result );
+		$this->assertStringContainsString( 'Hello', $result );
+		// The outer paragraph wrapper from the pipeline must be gone.
+		$this->assertStringNotContainsString( '<p><!-- wp:', $result );
+	}
+
+	/**
 	 * Multiple rows get separate placeholders.
 	 *
 	 * @return void
