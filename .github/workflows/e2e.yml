@@ -8,8 +8,13 @@ on:
 permissions:
     contents: read
 
+# E2E tests require the classic-to-gutenberg plugin to be installed in WordPress.
+# The reusable workflow does not yet support dependency plugins.
+# See: https://github.com/apermo/reusable-workflows/issues (TODO: create issue)
+# Skipped until the reusable workflow supports `requires-plugins` or similar.
 jobs:
     e2e:
+        if: false
         uses: apermo/reusable-workflows/.github/workflows/reusable-wp-e2e.yml@main
         with:
             wp-versions: '["latest"]'
