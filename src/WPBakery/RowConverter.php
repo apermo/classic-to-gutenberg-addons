@@ -17,14 +17,14 @@ class RowConverter {
 	/**
 	 * Callable that converts inner HTML content to Gutenberg blocks.
 	 *
-	 * @var Closure(string): string
+	 * @var Closure
 	 */
 	private Closure $inner_converter;
 
 	/**
 	 * Create a new row converter.
 	 *
-	 * @param Closure(string): string $inner_converter Converts HTML to Gutenberg blocks.
+	 * @param Closure $inner_converter Converts HTML to Gutenberg blocks.
 	 */
 	public function __construct( Closure $inner_converter ) {
 		$this->inner_converter = $inner_converter;
@@ -133,10 +133,7 @@ class RowConverter {
 		$style_attr   = '';
 
 		if ( $percent !== '' && $percent !== '100%' ) {
-			$attrs_json = ' ' . \json_encode(
-				[ 'width' => $percent ],
-				\JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE,
-			);
+			$attrs_json = ' ' . (string) wp_json_encode( [ 'width' => $percent ] );
 			$style_attr = " style=\"flex-basis:{$percent}\"";
 		}
 
@@ -155,8 +152,7 @@ class RowConverter {
 	 * @return string Gutenberg block markup.
 	 */
 	private function convert_inner_content( string $content ): string {
-		$blocks = [];
-
+		$blocks    = [];
 		$remaining = $content;
 
 		while ( $remaining !== '' ) {
@@ -166,45 +162,71 @@ class RowConverter {
 				break;
 			}
 
-			// Match [vc_column_text]...[/vc_column_text].
-			if ( \preg_match( '/^\[vc_column_text(?:\s[^\]]*)?](.*?)\[\/vc_column_text]/s', $remaining, $match ) ) {
-				$html = \trim( $match[1] );
-				if ( $html !== '' ) {
-					$blocks[] = ( $this->inner_converter )( $html );
+			$match_result = $this->try_match_shortcode( $remaining );
+
+			if ( $match_result !== null ) {
+				[ $remaining, $block ] = $match_result;
+				if ( $block !== '' ) {
+					$blocks[] = $block;
 				}
-				$remaining = \substr( $remaining, \strlen( $match[0] ) );
 				continue;
 			}
 
-			// Match [vc_row_inner]...[/vc_row_inner] for recursive conversion.
-			if ( \preg_match( '/^\[vc_row_inner(?:\s[^\]]*)?].*?\[\/vc_row_inner]/s', $remaining, $match ) ) {
-				$blocks[]  = $this->convert( $match[0] );
-				$remaining = \substr( $remaining, \strlen( $match[0] ) );
-				continue;
-			}
-
-			// Match any other shortcode and wrap in core/shortcode block.
-			if ( \preg_match( '/^\[(\w[\w-]*)(?:\s[^\]]*)?](?:.*?\[\/\1])?/s', $remaining, $match ) ) {
-				$blocks[]  = "<!-- wp:shortcode -->\n{$match[0]}\n<!-- /wp:shortcode -->";
-				$remaining = \substr( $remaining, \strlen( $match[0] ) );
-				continue;
-			}
-
-			// Plain text/HTML — pass to inner converter.
-			$next_shortcode = \strpos( $remaining, '[' );
-			if ( $next_shortcode === false ) {
-				$fragment  = \trim( $remaining );
-				$remaining = '';
-			} else {
-				$fragment  = \trim( \substr( $remaining, 0, $next_shortcode ) );
-				$remaining = \substr( $remaining, $next_shortcode );
-			}
-
-			if ( $fragment !== '' ) {
-				$blocks[] = ( $this->inner_converter )( $fragment );
+			[ $remaining, $block ] = $this->consume_plain_text( $remaining );
+			if ( $block !== '' ) {
+				$blocks[] = $block;
 			}
 		}
 
-		return \implode( "\n\n", \array_filter( $blocks, static fn( string $b ): bool => $b !== '' ) );
+		return \implode( "\n\n", $blocks );
+	}
+
+	/**
+	 * Try to match and convert a shortcode at the start of remaining content.
+	 *
+	 * @param string $remaining Current remaining content.
+	 *
+	 * @return array{string, string}|null [remaining, block] or null if no match.
+	 */
+	private function try_match_shortcode( string $remaining ): ?array {
+		if ( \preg_match( '/^\[vc_column_text(?:\s[^\]]*)?](.*?)\[\/vc_column_text]/s', $remaining, $match ) ) {
+			$html  = \trim( $match[1] );
+			$block = $html !== '' ? ( $this->inner_converter )( $html ) : '';
+			return [ \substr( $remaining, \strlen( $match[0] ) ), $block ];
+		}
+
+		if ( \preg_match( '/^\[vc_row_inner(?:\s[^\]]*)?].*?\[\/vc_row_inner]/s', $remaining, $match ) ) {
+			return [ \substr( $remaining, \strlen( $match[0] ) ), $this->convert( $match[0] ) ];
+		}
+
+		if ( \preg_match( '/^\[(\w[\w-]*)(?:\s[^\]]*)?](?:.*?\[\/\1])?/s', $remaining, $match ) ) {
+			$block = "<!-- wp:shortcode -->\n{$match[0]}\n<!-- /wp:shortcode -->";
+			return [ \substr( $remaining, \strlen( $match[0] ) ), $block ];
+		}
+
+		return null;
+	}
+
+	/**
+	 * Consume plain text/HTML up to the next shortcode.
+	 *
+	 * @param string $remaining Current remaining content.
+	 *
+	 * @return array{string, string} [remaining, block].
+	 */
+	private function consume_plain_text( string $remaining ): array {
+		$next_shortcode = \strpos( $remaining, '[' );
+
+		if ( $next_shortcode === false ) {
+			$fragment  = \trim( $remaining );
+			$remaining = '';
+		} else {
+			$fragment  = \trim( \substr( $remaining, 0, $next_shortcode ) );
+			$remaining = \substr( $remaining, $next_shortcode );
+		}
+
+		$block = $fragment !== '' ? ( $this->inner_converter )( $fragment ) : '';
+
+		return [ $remaining, $block ];
 	}
 }
