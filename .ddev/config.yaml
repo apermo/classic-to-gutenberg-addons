@@ -1,4 +1,4 @@
 name: classic-to-gutenberg-addons
 type: php
-docroot: ""
+docroot: .ddev/wordpress
 php_version: "8.4"
