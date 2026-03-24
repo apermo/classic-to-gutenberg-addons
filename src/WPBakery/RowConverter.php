@@ -30,6 +30,13 @@ class RowConverter {
 	private array $handlers = [];
 
 	/**
+	 * Pre-compiled regex patterns for handler matching, indexed by tag.
+	 *
+	 * @var array<string, string>
+	 */
+	private array $handler_patterns = [];
+
+	/**
 	 * Create a new row converter.
 	 *
 	 * @param Closure                     $inner_converter Converts HTML to Gutenberg blocks.
@@ -39,7 +46,7 @@ class RowConverter {
 		$this->inner_converter = $inner_converter;
 
 		foreach ( $handlers as $handler ) {
-			$this->handlers[ $handler->get_tag() ] = $handler;
+			$this->register_handler( $handler );
 		}
 	}
 
@@ -51,7 +58,21 @@ class RowConverter {
 	 * @return void
 	 */
 	public function add_handler( VcElementHandlerInterface $handler ): void {
-		$this->handlers[ $handler->get_tag() ] = $handler;
+		$this->register_handler( $handler );
+	}
+
+	/**
+	 * Register a handler and pre-compile its regex pattern.
+	 *
+	 * @param VcElementHandlerInterface $handler The handler to register.
+	 *
+	 * @return void
+	 */
+	private function register_handler( VcElementHandlerInterface $handler ): void {
+		$tag = $handler->get_tag();
+
+		$this->handlers[ $tag ]         = $handler;
+		$this->handler_patterns[ $tag ] = '/^\[' . \preg_quote( $tag, '/' ) . '(?:\s[^\]]*)?](?:.*?\[\/' . \preg_quote( $tag, '/' ) . '])?/s';
 	}
 
 	/**
@@ -223,9 +244,7 @@ class RowConverter {
 	 */
 	private function try_match_handler( string $remaining ): ?array {
 		foreach ( $this->handlers as $tag => $handler ) {
-			$pattern = '/^\[' . \preg_quote( $tag, '/' ) . '(?:\s[^\]]*)?](?:.*?\[\/' . \preg_quote( $tag, '/' ) . '])?/s';
-
-			if ( \preg_match( $pattern, $remaining, $match ) ) {
+			if ( \preg_match( $this->handler_patterns[ $tag ], $remaining, $match ) ) {
 				$block = $handler->convert( $match[0], $this->inner_converter );
 				return [ \substr( $remaining, \strlen( $match[0] ) ), $block ];
 			}

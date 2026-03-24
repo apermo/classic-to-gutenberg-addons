@@ -130,7 +130,7 @@ class RowConverterTest extends TestCase {
 		$result    = $converter->convert( $shortcode );
 
 		$this->assertStringContainsString( '<!-- wp:columns -->', $result );
-		$this->assertSame( 3, \substr_count( $result, '<!-- wp:column' ) - \substr_count( $result, '<!-- /wp:column' ) + 3 );
+		$this->assertSame( 3, \preg_match_all( '/<!-- wp:column\b/', $result ) );
 		$this->assertStringContainsString( '"width":"33.33%"', $result );
 	}
 

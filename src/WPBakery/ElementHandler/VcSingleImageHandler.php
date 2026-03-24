@@ -65,10 +65,10 @@ class VcSingleImageHandler implements VcElementHandlerInterface {
 		$img_class = "wp-image-{$attachment_id}";
 
 		if ( \function_exists( 'wp_get_attachment_image' ) ) {
-			$img = wp_get_attachment_image( $attachment_id, 'full', false, [ 'class' => $img_class ] );
+			$image_html = wp_get_attachment_image( $attachment_id, 'full', false, [ 'class' => $img_class ] );
 
-			if ( \is_string( $img ) && $img !== '' ) {
-				return $img;
+			if ( $image_html !== '' ) {
+				return $image_html;
 			}
 		}
 
