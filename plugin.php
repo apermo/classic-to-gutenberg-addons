@@ -7,7 +7,8 @@
  * Author URI:  https://apermo.de
  * License:     GPL-2.0-or-later
  * Text Domain: wpbakery-to-gutenberg
- * Requires at least: 6.2
+ * Requires Plugins: classic-to-gutenberg
+ * Requires at least: 6.5
  * Requires PHP: 8.2
  */
 

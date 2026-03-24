@@ -1,7 +1,7 @@
 === WPBakery to Gutenberg ===
 Contributors: flavor
 Tags: wordpress, gutenberg, migration, blocks, wpbakery, visual-composer
-Requires at least: 6.2
+Requires at least: 6.5
 Tested up to: 6.7
 Requires PHP: 8.2
 Stable tag: 0.1.0

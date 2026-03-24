@@ -9,7 +9,8 @@ shortcodes to native Gutenberg blocks. Extends
 [Classic to Gutenberg](https://github.com/apermo/classic-to-gutenberg) (`apermo/classic-to-gutenberg`) by hooking into
 its `pre_convert`/`post_convert` filter pipeline.
 
-**PHP 8.2+ minimum.** **WordPress 6.2+.** Strict types everywhere (`declare(strict_types=1)`).
+**PHP 8.2+ minimum.** **WordPress 6.5+** (uses `Requires Plugins` header). Strict types everywhere
+(`declare(strict_types=1)`).
 
 ### Relationship to Classic to Gutenberg
 

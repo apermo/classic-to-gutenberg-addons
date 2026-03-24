@@ -28,10 +28,6 @@ class WPBakery {
 	 * @return void
 	 */
 	public static function register(): void {
-		if ( ! \class_exists( CorePlugin::class ) ) {
-			return;
-		}
-
 		$inner_converter = CorePlugin::create_content_converter();
 		$inner_closure   = static fn( string $html ): string => $inner_converter->convert( $html );
 
