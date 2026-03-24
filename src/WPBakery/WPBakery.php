@@ -5,8 +5,13 @@ declare(strict_types=1);
 namespace Apermo\WPBakeryToGutenberg\WPBakery;
 
 use Apermo\ClassicToGutenberg\Plugin as CorePlugin;
+use Apermo\WPBakeryToGutenberg\WPBakery\ElementHandler\VcBtnHandler;
 use Apermo\WPBakeryToGutenberg\WPBakery\ElementHandler\VcColumnTextHandler;
+use Apermo\WPBakeryToGutenberg\WPBakery\ElementHandler\VcEmptySpaceHandler;
+use Apermo\WPBakeryToGutenberg\WPBakery\ElementHandler\VcRawHtmlHandler;
 use Apermo\WPBakeryToGutenberg\WPBakery\ElementHandler\VcRowInnerHandler;
+use Apermo\WPBakeryToGutenberg\WPBakery\ElementHandler\VcSeparatorHandler;
+use Apermo\WPBakeryToGutenberg\WPBakery\ElementHandler\VcSingleImageHandler;
 
 /**
  * Convenience class for registering WPBakery converters.
@@ -30,6 +35,11 @@ class WPBakery {
 			$inner_closure,
 			[
 				new VcColumnTextHandler(),
+				new VcSeparatorHandler(),
+				new VcEmptySpaceHandler(),
+				new VcRawHtmlHandler(),
+				new VcSingleImageHandler(),
+				new VcBtnHandler(),
 			],
 		);
 

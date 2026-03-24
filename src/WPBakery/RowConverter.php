@@ -157,7 +157,8 @@ class RowConverter {
 		$style_attr   = '';
 
 		if ( $percent !== '' && $percent !== '100%' ) {
-			$attrs_json = ' ' . (string) wp_json_encode( [ 'width' => $percent ] );
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode -- unit-testable without WP.
+			$attrs_json = ' ' . (string) \json_encode( [ 'width' => $percent ], \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE );
 			$style_attr = " style=\"flex-basis:{$percent}\"";
 		}
 
