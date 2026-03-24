@@ -20,22 +20,56 @@ class VcBtnHandler implements VcElementHandlerInterface {
 	 *
 	 * @param string $link The raw link attribute value.
 	 *
-	 * @return string The decoded URL, or empty string.
+	 * @return array{url: string, target: string} Parsed link parts.
 	 */
-	private static function parse_vc_link( string $link ): string {
+	private static function parse_vc_link( string $link ): array {
+		$result = [
+			'url'    => '',
+			'target' => '',
+		];
+
 		if ( $link === '' ) {
-			return '';
+			return $result;
 		}
 
 		$parts = \explode( '|', $link );
 
 		foreach ( $parts as $part ) {
 			if ( \str_starts_with( $part, 'url:' ) ) {
-				return \urldecode( \substr( $part, 4 ) );
+				$result['url'] = \urldecode( \substr( $part, 4 ) );
+			} elseif ( \str_starts_with( $part, 'target:' ) ) {
+				$result['target'] = \substr( $part, 7 );
 			}
 		}
 
-		return '';
+		return $result;
+	}
+
+	/**
+	 * Sanitize a URL for use in an href attribute.
+	 *
+	 * Uses esc_url() when available (WordPress loaded), otherwise falls back
+	 * to protocol validation + htmlspecialchars.
+	 *
+	 * @param string $href The raw URL.
+	 *
+	 * @return string Sanitized URL, or empty string if unsafe.
+	 */
+	private static function sanitize_url( string $href ): string {
+		if ( $href === '' ) {
+			return '';
+		}
+
+		if ( \function_exists( 'esc_url' ) ) {
+			return esc_url( $href );
+		}
+
+		// Reject dangerous protocols when esc_url is unavailable.
+		if ( \preg_match( '/^(javascript|data|vbscript):/i', $href ) ) {
+			return '';
+		}
+
+		return \htmlspecialchars( $href, \ENT_QUOTES | \ENT_HTML5, 'UTF-8' );
 	}
 
 	/**
@@ -64,15 +98,16 @@ class VcBtnHandler implements VcElementHandlerInterface {
 			return '';
 		}
 
-		$href = self::parse_vc_link( $link );
+		$parsed = self::parse_vc_link( $link );
 
-		$safe_title = \htmlspecialchars( $title, \ENT_QUOTES | \ENT_HTML5, 'UTF-8' );
-		$safe_href  = $href !== '' ? \htmlspecialchars( $href, \ENT_QUOTES | \ENT_HTML5, 'UTF-8' ) : '';
-		$href_attr  = $safe_href !== '' ? " href=\"{$safe_href}\"" : '';
+		$safe_title  = \htmlspecialchars( $title, \ENT_QUOTES | \ENT_HTML5, 'UTF-8' );
+		$safe_href   = self::sanitize_url( $parsed['url'] );
+		$href_attr   = $safe_href !== '' ? " href=\"{$safe_href}\"" : '';
+		$target_attr = $parsed['target'] !== '' ? ' target="' . \htmlspecialchars( $parsed['target'], \ENT_QUOTES | \ENT_HTML5, 'UTF-8' ) . '" rel="noreferrer noopener"' : '';
 
 		$button = BlockMarkup::wrap(
 			'button',
-			"<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\"{$href_attr}>{$safe_title}</a></div>",
+			"<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\"{$href_attr}{$target_attr}>{$safe_title}</a></div>",
 		);
 
 		return BlockMarkup::wrap( 'buttons', "<div class=\"wp-block-buttons\">{$button}</div>" );

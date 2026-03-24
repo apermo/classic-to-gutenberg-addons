@@ -220,7 +220,7 @@ class VcElementHandlerTest extends TestCase {
 	 *
 	 * @return void
 	 */
-	public function test_btn_plain_url(): void {
+	public function test_btn_with_target(): void {
 		$handler = new VcBtnHandler();
 		$result  = $handler->convert(
 			'[vc_btn title="Go" link="url:https://example.com|title:Example|target:_blank"]',
@@ -229,6 +229,8 @@ class VcElementHandlerTest extends TestCase {
 
 		$this->assertStringContainsString( 'https://example.com', $result );
 		$this->assertStringContainsString( 'Go', $result );
+		$this->assertStringContainsString( 'target="_blank"', $result );
+		$this->assertStringContainsString( 'rel="noreferrer noopener"', $result );
 	}
 
 	/**
@@ -245,6 +247,9 @@ class VcElementHandlerTest extends TestCase {
 
 		$this->assertStringNotContainsString( '<script>', $result );
 		$this->assertStringContainsString( '&lt;script&gt;', $result );
+		// javascript: URI must be rejected entirely.
+		$this->assertStringNotContainsString( 'javascript:', $result );
+		$this->assertStringNotContainsString( 'href', $result );
 	}
 
 	/**
