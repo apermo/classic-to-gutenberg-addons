@@ -1,6 +1,6 @@
 {
-    "name": "apermo/classic-to-gutenberg-addons",
-    "description": "Niche converters for classic-to-gutenberg: page builders, third-party plugins.",
+    "name": "apermo/wpbakery-to-gutenberg",
+    "description": "Convert WPBakery Page Builder content to native Gutenberg blocks.",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
     "keywords": [
@@ -18,8 +18,8 @@
         }
     ],
     "support": {
-        "issues": "https://github.com/apermo/classic-to-gutenberg-addons/issues",
-        "source": "https://github.com/apermo/classic-to-gutenberg-addons"
+        "issues": "https://github.com/apermo/wpbakery-to-gutenberg/issues",
+        "source": "https://github.com/apermo/wpbakery-to-gutenberg"
     },
     "require": {
         "php": ">=8.2",
@@ -36,12 +36,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Apermo\\ClassicToGutenbergAddons\\": "src/"
+            "Apermo\\WPBakeryToGutenberg\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Apermo\\ClassicToGutenbergAddons\\Tests\\": "tests/"
+            "Apermo\\WPBakeryToGutenberg\\Tests\\": "tests/"
         }
     },
     "scripts": {

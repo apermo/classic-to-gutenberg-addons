@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Apermo\ClassicToGutenbergAddons\WPBakery;
+namespace Apermo\WPBakeryToGutenberg\WPBakery;
 
 /**
  * Orchestrates WPBakery-to-Gutenberg conversion via pre/post_convert hooks.

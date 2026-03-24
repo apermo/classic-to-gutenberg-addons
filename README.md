@@ -1,10 +1,18 @@
-# Classic to Gutenberg Addons
+# WPBakery to Gutenberg
 
-[![PHP CI](https://github.com/apermo/classic-to-gutenberg-addons/actions/workflows/ci.yml/badge.svg)](https://github.com/apermo/classic-to-gutenberg-addons/actions/workflows/ci.yml)
+[![PHP CI](https://github.com/apermo/wpbakery-to-gutenberg/actions/workflows/ci.yml/badge.svg)](https://github.com/apermo/wpbakery-to-gutenberg/actions/workflows/ci.yml)
 [![License: GPL v2+](https://img.shields.io/badge/License-GPLv2+-blue.svg)](LICENSE)
 
-Niche converters for [Classic to Gutenberg](https://github.com/apermo/classic-to-gutenberg): page builders, third-party
-plugins, and other specialized HTML patterns that don't belong in the core plugin.
+Convert [WPBakery Page Builder](https://wpbakery.com/) (formerly Visual Composer) content to native Gutenberg blocks.
+Extends [Classic to Gutenberg](https://github.com/apermo/classic-to-gutenberg) by hooking into its conversion pipeline.
+
+## Supported Elements
+
+| WPBakery Shortcode | Gutenberg Block |
+|---|---|
+| `[vc_row]` / `[vc_row_inner]` | `core/columns` (multi-column) or unwrapped (single column) |
+| `[vc_column]` / `[vc_column_inner]` | `core/column` with percentage width |
+| `[vc_column_text]` | Inner HTML converted to standard blocks |
 
 ## Requirements
 
@@ -15,8 +23,11 @@ plugins, and other specialized HTML patterns that don't belong in the core plugi
 ## Installation
 
 ```bash
-composer require apermo/classic-to-gutenberg-addons
+composer require apermo/wpbakery-to-gutenberg
 ```
+
+Activate both plugins. WPBakery shortcodes are automatically converted when using Classic to Gutenberg's
+CLI commands or admin UI.
 
 ## Development
 

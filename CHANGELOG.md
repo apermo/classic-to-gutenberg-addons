@@ -11,4 +11,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project setup from template
 
-[Unreleased]: https://github.com/apermo/classic-to-gutenberg-addons/commits/main
+[Unreleased]: https://github.com/apermo/wpbakery-to-gutenberg/commits/main

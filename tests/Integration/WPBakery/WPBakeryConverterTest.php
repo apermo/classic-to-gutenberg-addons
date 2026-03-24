@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Apermo\ClassicToGutenbergAddons\Tests\Integration\WPBakery;
+namespace Apermo\WPBakeryToGutenberg\Tests\Integration\WPBakery;
 
 use Apermo\ClassicToGutenberg\ContentConverter;
 use Apermo\ClassicToGutenberg\Converter\BlockConverterFactory;
@@ -21,7 +21,7 @@ use Apermo\ClassicToGutenberg\Converter\Shortcode\GalleryHandler;
 use Apermo\ClassicToGutenberg\Converter\ShortcodeConverter;
 use Apermo\ClassicToGutenberg\Converter\TableConverter;
 use Apermo\ClassicToGutenberg\Parser\TopLevelSplitter;
-use Apermo\ClassicToGutenbergAddons\WPBakery\WPBakery;
+use Apermo\WPBakeryToGutenberg\WPBakery\WPBakery;
 use Generator;
 use WP_UnitTestCase;
 

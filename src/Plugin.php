@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Apermo\ClassicToGutenbergAddons;
+namespace Apermo\WPBakeryToGutenberg;
 
-use Apermo\ClassicToGutenbergAddons\WPBakery\WPBakery;
+use Apermo\WPBakeryToGutenberg\WPBakery\WPBakery;
 
 /**
  * Main plugin class.

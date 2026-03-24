@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Apermo\ClassicToGutenbergAddons\Tests\Unit\WPBakery;
+namespace Apermo\WPBakeryToGutenberg\Tests\Unit\WPBakery;
 
-use Apermo\ClassicToGutenbergAddons\WPBakery\ShortcodeParser;
+use Apermo\WPBakeryToGutenberg\WPBakery\ShortcodeParser;
 use PHPUnit\Framework\TestCase;
 
 /**

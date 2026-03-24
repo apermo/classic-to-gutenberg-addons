@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Apermo\ClassicToGutenbergAddons\WPBakery;
+namespace Apermo\WPBakeryToGutenberg\WPBakery;
 
 use Closure;
 

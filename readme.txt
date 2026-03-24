@@ -1,6 +1,6 @@
-=== Classic to Gutenberg Addons ===
+=== WPBakery to Gutenberg ===
 Contributors: flavor
-Tags: wordpress, gutenberg, migration, blocks
+Tags: wordpress, gutenberg, migration, blocks, wpbakery, visual-composer
 Requires at least: 6.2
 Tested up to: 6.7
 Requires PHP: 8.2
@@ -8,17 +8,18 @@ Stable tag: 0.1.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Niche converters for page builders and third-party plugins.
+Convert WPBakery Page Builder content to native Gutenberg blocks.
 
 == Description ==
 
-Classic to Gutenberg Addons provides niche converters for the Classic to Gutenberg plugin,
-covering page builders, third-party plugins, and other specialized HTML patterns.
+WPBakery to Gutenberg converts WPBakery Page Builder (formerly Visual Composer) shortcodes to native
+Gutenberg blocks. It extends the Classic to Gutenberg plugin, hooking into its conversion pipeline.
 
 == Installation ==
 
-1. Upload the plugin files to `/wp-content/plugins/classic-to-gutenberg-addons/`
-2. Activate the plugin through the "Plugins" screen in WordPress
+1. Install and activate the Classic to Gutenberg plugin
+2. Upload the plugin files to `/wp-content/plugins/wpbakery-to-gutenberg/`
+3. Activate the plugin through the "Plugins" screen in WordPress
 
 == Changelog ==
 
