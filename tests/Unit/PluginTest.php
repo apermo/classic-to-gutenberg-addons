@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Apermo\ClassicToGutenbergAddons\Tests\Unit;
+namespace Apermo\WPBakeryToGutenberg\Tests\Unit;
 
-use Apermo\ClassicToGutenbergAddons\Plugin;
+use Apermo\WPBakeryToGutenberg\Plugin;
 use Brain\Monkey;
 use Brain\Monkey\Functions;
 use PHPUnit\Framework\TestCase;

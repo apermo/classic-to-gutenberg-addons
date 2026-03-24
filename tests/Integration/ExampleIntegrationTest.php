@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Apermo\ClassicToGutenbergAddons\Tests\Integration;
+namespace Apermo\WPBakeryToGutenberg\Tests\Integration;
 
-use Apermo\ClassicToGutenbergAddons\Plugin;
+use Apermo\WPBakeryToGutenberg\Plugin;
 use WP_UnitTestCase;
 
 /**

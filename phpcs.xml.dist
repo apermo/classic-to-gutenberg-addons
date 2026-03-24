@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    name="classic-to-gutenberg-addons"
+    name="wpbakery-to-gutenberg"
     xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/PHPCSStandards/PHP_CodeSniffer/master/phpcs.xsd">
 
-    <description>PHPCS configuration for classic-to-gutenberg-addons.</description>
+    <description>PHPCS configuration for wpbakery-to-gutenberg.</description>
 
     <file>.</file>
     <exclude-pattern>vendor/*</exclude-pattern>
@@ -16,26 +16,26 @@
     <rule ref="WordPress.WP.I18n">
         <properties>
             <property name="text_domain" type="array">
-                <element value="classic-to-gutenberg-addons"/>
+                <element value="wpbakery-to-gutenberg"/>
             </property>
         </properties>
     </rule>
 
     <!--
         Project prefix for global functions, hooks, constants,
-        and namespace roots. E.g. prefix "Apermo\ClassicToGutenbergAddons" allows
-        namespace Apermo\ClassicToGutenbergAddons\Admin but flags Other\Admin.
+        and namespace roots. E.g. prefix "Apermo\WPBakeryToGutenberg" allows
+        namespace Apermo\WPBakeryToGutenberg\Admin but flags Other\Admin.
     -->
     <rule ref="WordPress.NamingConventions.PrefixAllGlobals">
         <properties>
             <property name="prefixes" type="array">
-                <element value="Apermo\ClassicToGutenbergAddons"/>
-                <element value="classic_to_gutenberg_addons"/>
+                <element value="Apermo\WPBakeryToGutenberg"/>
+                <element value="wpbakery_to_gutenberg"/>
             </property>
         </properties>
         <!-- Test bootstrap uses standard WP test globals, not plugin globals. -->
         <exclude-pattern>tests/bootstrap.php</exclude-pattern>
     </rule>
 
-    <config name="minimum_wp_version" value="6.2"/>
+    <config name="minimum_wp_version" value="6.5"/>
 </ruleset>

@@ -4,74 +4,60 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-WordPress plugin providing niche converters for
-[Classic to Gutenberg](https://github.com/apermo/classic-to-gutenberg) (`apermo/classic-to-gutenberg`): page builders,
-third-party plugins, and other specialized HTML patterns that don't belong in the core plugin.
+WordPress plugin that converts [WPBakery Page Builder](https://wpbakery.com/) (formerly Visual Composer)
+shortcodes to native Gutenberg blocks. Extends
+[Classic to Gutenberg](https://github.com/apermo/classic-to-gutenberg) (`apermo/classic-to-gutenberg`) by hooking into
+its `pre_convert`/`post_convert` filter pipeline.
 
-Origin: [apermo/classic-to-gutenberg#18](https://github.com/apermo/classic-to-gutenberg/issues/18).
+**PHP 8.2+ minimum.** **WordPress 6.5+** (uses `Requires Plugins` header). Strict types everywhere
+(`declare(strict_types=1)`).
 
-**PHP 8.2+ minimum.** **WordPress 6.2+.** Strict types everywhere (`declare(strict_types=1)`).
+### Relationship to Classic to Gutenberg
 
-### Relationship to the core plugin
+The core plugin (lives at `/Users/cd/repos/apermo/classic-to-gutenberg`) handles generic HTML-to-block conversion. It
+exposes `classic_to_gutenberg_pre_convert` and `classic_to_gutenberg_post_convert` filters. This plugin hooks both:
 
-The core plugin (`apermo/classic-to-gutenberg`, lives at `/Users/cd/repos/apermo/classic-to-gutenberg`) handles generic
-HTML-to-block conversion (paragraphs, headings, images, lists, tables, shortcodes, etc.). It exposes a
-`classic_to_gutenberg_converters` filter that passes a `BlockConverterFactory` instance. This addons plugin hooks into
-that filter to register additional converters for page-builder and third-party-plugin markup.
+- **pre_convert**: Finds `[vc_row]...[/vc_row]` blocks before `wpautop` fragments them, converts to Gutenberg blocks,
+  replaces with placeholder comments
+- **post_convert**: Swaps placeholders (wrapped in `<!-- wp:html -->` by the pipeline) back with converted blocks
 
-Key core classes to know:
+This approach piggybacks on the core's entire infrastructure: `ContentConverter`, `MigrationRunner` (post locking,
+revisions, rollback), CLI commands, and admin UI.
 
-- `BlockConverterInterface` — interface every converter implements (`get_supported_tags`, `can_convert`, `convert`)
-- `AbstractBlockConverter` — optional base class with serialization helpers
-- `BlockConverterFactory` — LIFO registry; `register()` adds a converter, `get_converter()` resolves by tag + content
-- The factory checks converters in reverse registration order; first `can_convert() === true` wins
+### Conversion approach
 
-### Design principles
+WPBakery shortcodes → Gutenberg blocks:
 
-- **Opt-in per page builder** — users register only converters they need
-- **Filters only** — no custom directory loader, no mu-plugins pattern, no admin UI or CLI
-- **Own release cycle** — can move faster than core
-- **Own test fixtures** — real-world page builder markup
-- **Broken markup policy inherited from core** — shit in, shit out; don't repair broken HTML
+- `[vc_row]` with single full-width column → unwrapped inner content
+- `[vc_row]` with multiple columns → `core/columns` + `core/column` blocks
+- `[vc_column_text]` → inner HTML converted via core's `ContentConverter`
+- `[vc_row_inner]` / `[vc_column_inner]` → nested columns (recursive)
+- Unknown shortcodes → `core/shortcode` block (fallback)
+
+Key design decisions:
+
+- **Re-entrancy guard**: Inner `ContentConverter` also fires `pre_convert`/`post_convert` filters; depth counter prevents
+  nested calls from resetting state
+- **Placeholder mechanism**: Converted blocks survive the pipeline as HTML comments, swapped back in `post_convert`
+- **Element handler registry**: Each WPBakery shortcode type is a standalone handler class implementing
+  `VcElementHandlerInterface`, making new elements trivial to add
 
 ## Architecture
 
 - `plugin.php` — Main plugin entry point
-- `src/Plugin.php` — Plugin bootstrap (hooks into `plugins_loaded`, registers converters via filter)
-- `src/` — PSR-4 root (namespace: `Apermo\ClassicToGutenbergAddons`)
+- `src/Plugin.php` — Plugin bootstrap (hooks into `plugins_loaded`)
+- `src/WPBakery/WPBakery.php` — Registration: hooks pre/post_convert, wires handlers
+- `src/WPBakery/Converter.php` — Pre/post_convert orchestrator with placeholder mechanism
+- `src/WPBakery/RowConverter.php` — Converts `[vc_row]` to columns/content blocks
+- `src/WPBakery/ShortcodeParser.php` — Attribute parsing, content extraction, width mapping
+- `src/WPBakery/ElementHandler/` — Individual shortcode type handlers
 - `tests/` — PHPUnit tests (Unit + Integration)
+- `tests/fixtures/` — Input/expected output pairs for integration tests
 - `uninstall.php` — Cleanup on plugin deletion
-
-### Converter structure (planned)
-
-Each page builder / third-party plugin gets its own namespace directory under `src/`:
-
-```
-src/
-├── Plugin.php
-├── WPBakery/
-│   ├── WPBakery.php              ← convenience registration class
-│   ├── RowConverter.php
-│   ├── ColumnConverter.php
-│   └── ColumnTextConverter.php
-├── Elementor/
-│   └── ...
-└── TablePress/
-    └── ...
-```
-
-Registration pattern:
-
-```php
-add_filter( 'classic_to_gutenberg_converters', function ( BlockConverterFactory $factory ): BlockConverterFactory {
-    WPBakery::register( $factory );
-    return $factory;
-} );
-```
 
 ### Key conventions
 
-- PSR-4 autoloading under `src/`
+- PSR-4 autoloading under `src/` (namespace: `Apermo\WPBakeryToGutenberg`)
 - Coding standards: `apermo/apermo-coding-standards` (PHPCS)
 - Static analysis: `apermo/phpstan-wordpress-rules` + `szepeviktor/phpstan-wordpress`
 - Testing: PHPUnit + Brain Monkey + Yoast PHPUnit Polyfills
@@ -98,13 +84,14 @@ ddev start && ddev orchestrate   # Full WordPress environment
 
 - Uses `apermo/ddev-orchestrate` addon
 - Project type is `php` (not `wordpress`), so WP-CLI uses a custom `ddev wp` command wrapper
-- Both this plugin and the core plugin need to be symlinked into `wp-content/plugins/`
+- Custom fragment `28-link-core-plugin.sh` symlinks the core plugin from `vendor/` into WordPress
+- Custom fragment `31-activate-core-plugin.sh` activates the core plugin
 
 ## Git Workflow
 
 **Never push directly to main.** All changes go through feature branches and pull requests.
 
-Branch naming: `<type>/<short-description>` (e.g. `feat/wpbakery-converters`, `fix/column-parsing`).
+Branch naming: `<type>/<short-description>` (e.g. `feat/image-handler`, `fix/column-width`).
 
 ## Git Hooks
 

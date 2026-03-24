@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Apermo\ClassicToGutenbergAddons;
+namespace Apermo\WPBakeryToGutenberg;
+
+use Apermo\WPBakeryToGutenberg\WPBakery\WPBakery;
 
 /**
  * Main plugin class.
@@ -66,6 +68,6 @@ class Plugin {
 	 * @return void
 	 */
 	public static function boot(): void {
-		// Initialize plugin functionality.
+		WPBakery::register();
 	}
 }
