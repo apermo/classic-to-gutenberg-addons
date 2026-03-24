@@ -18,7 +18,7 @@ Extends [Classic to Gutenberg](https://github.com/apermo/classic-to-gutenberg) b
 
 - PHP 8.2+
 - WordPress 6.5+
-- [apermo/classic-to-gutenberg](https://github.com/apermo/classic-to-gutenberg) ^0.4
+- [apermo/classic-to-gutenberg](https://github.com/apermo/classic-to-gutenberg) ^0.5
 
 ## Installation
 

@@ -214,4 +214,37 @@ class ConverterTest extends TestCase {
 		$this->assertStringContainsString( 'Outer', $result );
 		$this->assertStringNotContainsString( 'vc:placeholder', $result );
 	}
+
+	/**
+	 * Orphan post_convert (without preceding pre_convert) is a no-op.
+	 *
+	 * @return void
+	 */
+	public function test_orphan_post_convert_is_noop(): void {
+		$converter = new Converter( $this->row_converter );
+
+		$result = $converter->post_convert( 'some content' );
+
+		$this->assertSame( 'some content', $result );
+	}
+
+	/**
+	 * Depth never goes negative even with mismatched calls.
+	 *
+	 * @return void
+	 */
+	public function test_depth_stays_non_negative(): void {
+		$converter = new Converter( $this->row_converter );
+
+		// Two orphan post_convert calls.
+		$converter->post_convert( 'a' );
+		$converter->post_convert( 'b' );
+
+		// pre_convert should still work normally after mismatched calls.
+		$result = $converter->pre_convert(
+			'[vc_row][vc_column][vc_column_text]Works[/vc_column_text][/vc_column][/vc_row]',
+		);
+
+		$this->assertStringContainsString( '<!-- vc:placeholder:0 -->', $result );
+	}
 }

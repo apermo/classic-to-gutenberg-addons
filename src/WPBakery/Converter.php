@@ -101,6 +101,10 @@ class Converter {
 	 * @return string Content with placeholders replaced by block markup.
 	 */
 	public function post_convert( string $content ): string {
+		if ( $this->depth <= 0 ) {
+			return $content;
+		}
+
 		$this->depth--;
 
 		if ( $this->depth > 0 ) {
