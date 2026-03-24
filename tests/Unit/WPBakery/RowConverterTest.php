@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Apermo\WPBakeryToGutenberg\Tests\Unit\WPBakery;
 
+use Apermo\WPBakeryToGutenberg\WPBakery\ElementHandler\VcColumnTextHandler;
+use Apermo\WPBakeryToGutenberg\WPBakery\ElementHandler\VcRowInnerHandler;
 use Apermo\WPBakeryToGutenberg\WPBakery\RowConverter;
 use Closure;
 use PHPUnit\Framework\TestCase;
@@ -39,6 +41,28 @@ class RowConverterTest extends TestCase {
 	}
 
 	/**
+	 * Create a RowConverter with standard handlers for testing.
+	 *
+	 * @return RowConverter
+	 */
+	private function create_converter(): RowConverter {
+		$converter = new RowConverter(
+			$this->inner_converter,
+			[
+				new VcColumnTextHandler(),
+			],
+		);
+
+		$converter->add_handler(
+			new VcRowInnerHandler(
+				static fn( string $shortcode ): string => $converter->convert( $shortcode ),
+			),
+		);
+
+		return $converter;
+	}
+
+	/**
 	 * Single full-width column unwraps to inner content blocks.
 	 *
 	 * @return void
@@ -46,7 +70,7 @@ class RowConverterTest extends TestCase {
 	public function test_single_full_width_column_unwraps(): void {
 		$shortcode = '[vc_row][vc_column][vc_column_text]Hello world[/vc_column_text][/vc_column][/vc_row]';
 
-		$converter = new RowConverter( $this->inner_converter );
+		$converter = $this->create_converter();
 		$result    = $converter->convert( $shortcode );
 
 		$this->assertStringContainsString( '<!-- wp:paragraph -->', $result );
@@ -62,7 +86,7 @@ class RowConverterTest extends TestCase {
 	public function test_single_column_explicit_full_width_unwraps(): void {
 		$shortcode = '[vc_row][vc_column width="1/1"][vc_column_text]Content[/vc_column_text][/vc_column][/vc_row]';
 
-		$converter = new RowConverter( $this->inner_converter );
+		$converter = $this->create_converter();
 		$result    = $converter->convert( $shortcode );
 
 		$this->assertStringNotContainsString( '<!-- wp:columns -->', $result );
@@ -80,7 +104,7 @@ class RowConverterTest extends TestCase {
 			. '[vc_column width="1/2"][vc_column_text]Right[/vc_column_text][/vc_column]'
 			. '[/vc_row]';
 
-		$converter = new RowConverter( $this->inner_converter );
+		$converter = $this->create_converter();
 		$result    = $converter->convert( $shortcode );
 
 		$this->assertStringContainsString( '<!-- wp:columns -->', $result );
@@ -102,7 +126,7 @@ class RowConverterTest extends TestCase {
 			. '[vc_column width="1/3"][vc_column_text]C[/vc_column_text][/vc_column]'
 			. '[/vc_row]';
 
-		$converter = new RowConverter( $this->inner_converter );
+		$converter = $this->create_converter();
 		$result    = $converter->convert( $shortcode );
 
 		$this->assertStringContainsString( '<!-- wp:columns -->', $result );
@@ -121,7 +145,7 @@ class RowConverterTest extends TestCase {
 			. '[vc_column width="1/3"][vc_column_text]Narrow[/vc_column_text][/vc_column]'
 			. '[/vc_row]';
 
-		$converter = new RowConverter( $this->inner_converter );
+		$converter = $this->create_converter();
 		$result    = $converter->convert( $shortcode );
 
 		$this->assertStringContainsString( '"width":"66.66%"', $result );
@@ -139,7 +163,7 @@ class RowConverterTest extends TestCase {
 			. '[vc_column_inner width="1/2"][vc_column_text]B[/vc_column_text][/vc_column_inner]'
 			. '[/vc_row_inner][/vc_column][/vc_row]';
 
-		$converter = new RowConverter( $this->inner_converter );
+		$converter = $this->create_converter();
 		$result    = $converter->convert( $shortcode );
 
 		$this->assertStringContainsString( '<!-- wp:columns -->', $result );
@@ -155,7 +179,7 @@ class RowConverterTest extends TestCase {
 	public function test_empty_row(): void {
 		$shortcode = '[vc_row][vc_column][/vc_column][/vc_row]';
 
-		$converter = new RowConverter( $this->inner_converter );
+		$converter = $this->create_converter();
 		$result    = $converter->convert( $shortcode );
 
 		$this->assertSame( '', $result );
@@ -171,7 +195,7 @@ class RowConverterTest extends TestCase {
 			. '[vc_column][vc_column_text]Styled[/vc_column_text][/vc_column]'
 			. '[/vc_row]';
 
-		$converter = new RowConverter( $this->inner_converter );
+		$converter = $this->create_converter();
 		$result    = $converter->convert( $shortcode );
 
 		$this->assertStringContainsString( 'Styled', $result );
@@ -188,7 +212,7 @@ class RowConverterTest extends TestCase {
 			. '[vc_column][vc_column_text]B[/vc_column_text][/vc_column]'
 			. '[/vc_row]';
 
-		$converter = new RowConverter( $this->inner_converter );
+		$converter = $this->create_converter();
 		$result    = $converter->convert( $shortcode );
 
 		$this->assertStringContainsString( '<!-- wp:columns -->', $result );

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Apermo\WPBakeryToGutenberg\WPBakery;
 
 use Apermo\ClassicToGutenberg\Plugin as CorePlugin;
+use Apermo\WPBakeryToGutenberg\WPBakery\ElementHandler\VcColumnTextHandler;
+use Apermo\WPBakeryToGutenberg\WPBakery\ElementHandler\VcRowInnerHandler;
 
 /**
  * Convenience class for registering WPBakery converters.
@@ -22,9 +24,22 @@ class WPBakery {
 	 */
 	public static function register(): void {
 		$inner_converter = CorePlugin::create_content_converter();
-		$row_converter   = new RowConverter(
-			static fn( string $html ): string => $inner_converter->convert( $html ),
+		$inner_closure   = static fn( string $html ): string => $inner_converter->convert( $html );
+
+		$row_converter = new RowConverter(
+			$inner_closure,
+			[
+				new VcColumnTextHandler(),
+			],
 		);
+
+		// VcRowInnerHandler needs to call RowConverter::convert() recursively.
+		$row_converter->add_handler(
+			new VcRowInnerHandler(
+				static fn( string $shortcode ): string => $row_converter->convert( $shortcode ),
+			),
+		);
+
 		$converter = new Converter( $row_converter );
 
 		add_filter( 'classic_to_gutenberg_pre_convert', [ $converter, 'pre_convert' ] );

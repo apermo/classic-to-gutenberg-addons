@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Apermo\WPBakeryToGutenberg\WPBakery;
 
+use Apermo\WPBakeryToGutenberg\WPBakery\ElementHandler\VcElementHandlerInterface;
 use Closure;
 
 /**
@@ -22,12 +23,35 @@ class RowConverter {
 	private Closure $inner_converter;
 
 	/**
+	 * Registered element handlers indexed by shortcode tag.
+	 *
+	 * @var array<string, VcElementHandlerInterface>
+	 */
+	private array $handlers = [];
+
+	/**
 	 * Create a new row converter.
 	 *
-	 * @param Closure $inner_converter Converts HTML to Gutenberg blocks.
+	 * @param Closure                     $inner_converter Converts HTML to Gutenberg blocks.
+	 * @param VcElementHandlerInterface[] $handlers        Element handlers.
 	 */
-	public function __construct( Closure $inner_converter ) {
+	public function __construct( Closure $inner_converter, array $handlers = [] ) {
 		$this->inner_converter = $inner_converter;
+
+		foreach ( $handlers as $handler ) {
+			$this->handlers[ $handler->get_tag() ] = $handler;
+		}
+	}
+
+	/**
+	 * Register an additional element handler.
+	 *
+	 * @param VcElementHandlerInterface $handler The handler to register.
+	 *
+	 * @return void
+	 */
+	public function add_handler( VcElementHandlerInterface $handler ): void {
+		$this->handlers[ $handler->get_tag() ] = $handler;
 	}
 
 	/**
@@ -145,7 +169,7 @@ class RowConverter {
 	/**
 	 * Convert the inner content of a column to Gutenberg blocks.
 	 *
-	 * Handles [vc_column_text], [vc_row_inner], and unknown shortcodes.
+	 * Iterates registered element handlers, falls back to core/shortcode for unknown tags.
 	 *
 	 * @param string $content The inner content of a column.
 	 *
@@ -162,13 +186,21 @@ class RowConverter {
 				break;
 			}
 
-			$match_result = $this->try_match_shortcode( $remaining );
+			$match_result = $this->try_match_handler( $remaining );
 
 			if ( $match_result !== null ) {
 				[ $remaining, $block ] = $match_result;
 				if ( $block !== '' ) {
 					$blocks[] = $block;
 				}
+				continue;
+			}
+
+			$match_result = $this->try_match_unknown_shortcode( $remaining );
+
+			if ( $match_result !== null ) {
+				[ $remaining, $block ] = $match_result;
+				$blocks[] = $block;
 				continue;
 			}
 
@@ -182,23 +214,33 @@ class RowConverter {
 	}
 
 	/**
-	 * Try to match and convert a shortcode at the start of remaining content.
+	 * Try to match a registered element handler at the start of remaining content.
 	 *
 	 * @param string $remaining Current remaining content.
 	 *
 	 * @return array{string, string}|null [remaining, block] or null if no match.
 	 */
-	private function try_match_shortcode( string $remaining ): ?array {
-		if ( \preg_match( '/^\[vc_column_text(?:\s[^\]]*)?](.*?)\[\/vc_column_text]/s', $remaining, $match ) ) {
-			$html  = \trim( $match[1] );
-			$block = $html !== '' ? ( $this->inner_converter )( $html ) : '';
-			return [ \substr( $remaining, \strlen( $match[0] ) ), $block ];
+	private function try_match_handler( string $remaining ): ?array {
+		foreach ( $this->handlers as $tag => $handler ) {
+			$pattern = '/^\[' . \preg_quote( $tag, '/' ) . '(?:\s[^\]]*)?](?:.*?\[\/' . \preg_quote( $tag, '/' ) . '])?/s';
+
+			if ( \preg_match( $pattern, $remaining, $match ) ) {
+				$block = $handler->convert( $match[0], $this->inner_converter );
+				return [ \substr( $remaining, \strlen( $match[0] ) ), $block ];
+			}
 		}
 
-		if ( \preg_match( '/^\[vc_row_inner(?:\s[^\]]*)?].*?\[\/vc_row_inner]/s', $remaining, $match ) ) {
-			return [ \substr( $remaining, \strlen( $match[0] ) ), $this->convert( $match[0] ) ];
-		}
+		return null;
+	}
 
+	/**
+	 * Match any unknown shortcode and wrap in core/shortcode block.
+	 *
+	 * @param string $remaining Current remaining content.
+	 *
+	 * @return array{string, string}|null [remaining, block] or null if no match.
+	 */
+	private function try_match_unknown_shortcode( string $remaining ): ?array {
 		if ( \preg_match( '/^\[(\w[\w-]*)(?:\s[^\]]*)?](?:.*?\[\/\1])?/s', $remaining, $match ) ) {
 			$block = "<!-- wp:shortcode -->\n{$match[0]}\n<!-- /wp:shortcode -->";
 			return [ \substr( $remaining, \strlen( $match[0] ) ), $block ];

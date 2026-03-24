@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Apermo\WPBakeryToGutenberg\Tests\Unit\WPBakery;
 
 use Apermo\WPBakeryToGutenberg\WPBakery\Converter;
+use Apermo\WPBakeryToGutenberg\WPBakery\ElementHandler\VcColumnTextHandler;
 use Apermo\WPBakeryToGutenberg\WPBakery\RowConverter;
 use PHPUnit\Framework\TestCase;
 
@@ -37,7 +38,12 @@ class ConverterTest extends TestCase {
 			return "<!-- wp:paragraph -->\n<p>{$content}</p>\n<!-- /wp:paragraph -->";
 		};
 
-		$this->row_converter = new RowConverter( $inner_converter );
+		$this->row_converter = new RowConverter(
+			$inner_converter,
+			[
+				new VcColumnTextHandler(),
+			],
+		);
 	}
 
 	/**
