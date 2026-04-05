@@ -11,11 +11,4 @@ playwright-report/
 test-results/
 
 # WordPress core (downloaded by DDEV orchestrate)
-/wp-admin/
-/wp-includes/
-/wp-content/
-/wp-*.php
-/xmlrpc.php
-/license.txt
-/readme.html
-/index.php
+.ddev/wordpress/

@@ -84,6 +84,8 @@ ddev start && ddev orchestrate   # Full WordPress environment
 
 - Uses `apermo/ddev-orchestrate` addon
 - Project type is `php` (not `wordpress`), so WP-CLI uses a custom `ddev wp` command wrapper
+- WordPress installs into `.ddev/wordpress/` subdirectory (keeps project root clean)
+- `ddev-orchestrate` symlinks the project into the WP plugins/themes directory automatically
 - Custom fragment `28-link-core-plugin.sh` symlinks the core plugin from `vendor/` into WordPress
 - Custom fragment `31-activate-core-plugin.sh` activates the core plugin
 
