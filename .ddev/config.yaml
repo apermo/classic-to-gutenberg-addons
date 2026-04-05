@@ -2,3 +2,6 @@ name: wpbakery-to-gutenberg
 type: php
 docroot: .ddev/wordpress
 php_version: "8.4"
+hooks:
+    pre-start:
+        - exec-host: mkdir -p .ddev/wordpress
