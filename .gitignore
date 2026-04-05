@@ -1,5 +1,4 @@
 vendor/
-composer.lock
 .phpunit.cache/
 wp-tests-config.php
 .idea/
